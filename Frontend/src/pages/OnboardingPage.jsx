@@ -42,8 +42,9 @@ const {authUser}=useAuthUser();
 
 
    const handleRandomAvatar = () => {
-    const ind = Math.floor(Math.random() * 100) + 1; // 1-100 included
-    const randomAvatar = `https://avatar.iran.liara.run/public/${ind}.png`;
+   const seed = Math.random().toString(36).substring(2, 10);
+  const randomAvatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${seed}`;
+
 
     setFormState({ ...formState, profilepic: randomAvatar });
     toast.success("Random profile picture generated!");
@@ -60,7 +61,7 @@ const {authUser}=useAuthUser();
           {/* PROFILE PIC CONTAINER */}
           <div  className="flex flex-col items-center justify-center space-y-4">
             {/* image */}
-            <div className='rouded-full size-32 bg-base-300 overflow-hidden'> 
+            <div className='rounded-full size-32 bg-base-300 overflow-hidden'> 
               { formState.profilepic?  (<img src={formState.profilepic} alt="" className='w-full h-full object-cover'/>)  : 
               (<div className="flex items-center justify-center h-full"> <CameraIcon className="size-12 text-base-content opacity-40" /></div>) }
               </div>
