@@ -3,6 +3,9 @@ import React, { useState } from 'react';
 import { login } from '../lib/api.js';
 import { ShipWheelIcon, Lock, Mail } from 'lucide-react';
 import { Link } from 'react-router';
+import { auth, googleProvider } from "../firebase.js";
+import toast from "react-hot-toast"
+import { signInWithPopup } from 'firebase/auth';
 
 const LoginPage = () => {
   const [loginData, setLoginData] = useState({
@@ -24,6 +27,35 @@ const LoginPage = () => {
     e.preventDefault();
     loginMutation(loginData);
   };
+
+
+  
+  
+    const handleGoogleLogin=async ()=>{
+      try {
+        const result =await signInWithPopup(auth,googleProvider);
+        const user=result.user;
+  
+        // Prepare payload for backend
+        const payload = {
+          fullName: user.displayName || "No Name", // Google name
+          email: user.email,
+          profilepic: user.photoURL,              // Google profile pic
+          firebaseUid: user.uid,                  // Firebase UID
+        };
+  
+        // Send to backend to handle session/token creation
+        const res=await axiosInstance.post("/auth/google-signin",payload);//"Hey, this user signed in using Google. Here's their data. Please create or fetch their account in your system."...telling to backend
+        toast.success("Logged in with Google!");
+      queryClient.invalidateQueries({ queryKey: ["authUser"] });
+    } catch (error) {
+      toast.error("Google Sign-In failed");
+      console.error("Google Sign-In error", error);
+    }
+  };
+  
+  
+  
 
   return (
     <div
@@ -50,6 +82,8 @@ const LoginPage = () => {
             </div>
           )}
 
+          
+
           {/* Main Form */}
           <form onSubmit={handleLogin} className="w-full">
             <div className="space-y-6">
@@ -60,6 +94,22 @@ const LoginPage = () => {
                   Sign in to your account to continue your language journey.
                 </p>
               </div>
+
+                          
+            
+{/* GOOGLE SIGNIN */}
+            <button
+  type="button"
+  onClick={handleGoogleLogin}
+  className="btn btn-outline w-full mt-2 hover:scale-105 transition-transform flex items-center justify-center gap-2"
+>
+  <img
+    src="https://www.svgrepo.com/show/475656/google-color.svg"
+    alt="Google icon"
+    className="w-5 h-5"
+  />
+  Continue with Google
+</button>
 
               {/* Input Fields */}
               <div className="flex flex-col gap-3">
@@ -150,6 +200,8 @@ const LoginPage = () => {
                     </Link>
                   </p>
                 </div>
+
+    
               </div>
             </div>
           </form>
