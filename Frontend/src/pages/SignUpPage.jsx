@@ -4,6 +4,10 @@ import { Snowflake, Mail, Lock, User } from 'lucide-react';
 import { Link } from 'react-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from '../lib/axios.js';
+import { auth, googleProvider } from "../firebase.js";
+import toast from "react-hot-toast"
+import { signInWithPopup } from 'firebase/auth';
+
 
 const SignUpPage = () => {
   const [signupData, setSignupData] = useState({
@@ -25,6 +29,34 @@ const SignUpPage = () => {
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["authUser"] })
   });
+
+
+
+
+
+  const handleGoogleSignup=async ()=>{
+    try {
+      const result =await signInWithPopup(auth,googleProvider);
+      const user=result.user;
+
+      // Prepare payload for backend
+      const payload = {
+        fullName: user.displayName || "No Name", // Google name
+        email: user.email,
+        profilepic: user.photoURL,              // Google profile pic
+        firebaseUid: user.uid,                  // Firebase UID
+      };
+
+      // Send to backend to handle session/token creation
+      const res=await axiosInstance.post("/auth/google-signin",payload);//"Hey, this user signed in using Google. Here's their data. Please create or fetch their account in your system."...telling to backend
+      toast.success("Logged in with Google!");
+    queryClient.invalidateQueries({ queryKey: ["authUser"] });
+  } catch (error) {
+    toast.error("Google Sign-In failed");
+    console.error("Google Sign-In error", error);
+  }
+};
+
 
 
 
@@ -128,6 +160,21 @@ const SignUpPage = () => {
               )}
             </button>
 
+            
+{/* GOOGLE SIGNIN */}
+            <button
+  type="button"
+  onClick={handleGoogleSignup}
+  className="btn btn-outline w-full mt-2 hover:scale-105 transition-transform flex items-center justify-center gap-2"
+>
+  <img
+    src="https://www.svgrepo.com/show/475656/google-color.svg"
+    alt="Google icon"
+    className="w-5 h-5"
+  />
+  Continue with Google
+</button>
+
             <div className='text-center mt-4'>
               <p className='text-sm'>
                 Already have an account? <Link to="/login" className='text-primary hover:underline'>Sign in</Link>
@@ -136,6 +183,8 @@ const SignUpPage = () => {
 
           </form>
         </div>
+
+        
 
 
 
