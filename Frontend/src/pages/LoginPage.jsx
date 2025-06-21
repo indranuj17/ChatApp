@@ -6,6 +6,7 @@ import { Link } from 'react-router';
 import { auth, googleProvider } from "../firebase.js";
 import toast from "react-hot-toast"
 import { signInWithPopup } from 'firebase/auth';
+import { axiosInstance } from '../lib/axios.js';
 
 const LoginPage = () => {
   const [loginData, setLoginData] = useState({
